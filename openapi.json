@@ -1,0 +1,4320 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SocialPilot API",
+    "description": "API for creating and managing team members with different roles and permissions",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://staging-api.socialpilot.co/uat",
+      "description": "UAT server"
+    }
+  ],
+  "paths": {
+    "/generate-token": {
+      "get": {
+        "summary": "Generate authentication token",
+        "description": "Generates an authentication token for the specified user id",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "string"
+            },
+            "description": "Please enter the user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imt1bmpAc29jaWFscGlsb3QuY28iLCJjSWQiOiI3MDk3Mjg2Mi0wYjk1LTQyZjUtYTc0Yy0xNDFmYWM3MjI1ODYiLCJlbnRlcnByaXNlSWQiOjEsImlhdCI6MTc0MjMwNDg5MiwiZXhwIjoxNzQyNDI0ODkyfQ.SBGJpzwdwIMQ2-HuwZ-jyORJ1ff9Fzh9VOXJNobgsIM"
+                    },
+                    "expiresIn": {
+                      "type": "integer",
+                      "example": 120
+                    },
+                    "domain": {
+                      "type": "string",
+                      "example": "yourdomain.com"
+                    },
+                    "clientId": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "enterpriseId": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid API key"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User with this email does not exist"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/create": {
+      "post": {
+        "summary": "Create a new user",
+        "description": "Creates a new user with specific role-based permissions",
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OwnerCreateRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AdminRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ManagerRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ContentSchedulerRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ClientRequest"
+                  }
+                ]
+              },
+              "examples": {
+                "ownerCreate": {
+                  "summary": "Create Owner/User Request",
+                  "value": {
+                    "email": "owner@myorg.com",
+                    "firstName": "Eva",
+                    "lastName": "Musk",
+                    "accountCount": 5
+                  }
+                },
+                "admin": {
+                  "summary": "Create Admin Request",
+                  "value": {
+                    "email": "admin@myorg.com",
+                    "firstName": "Adam",
+                    "lastName": "Smith",
+                    "role": "ADMIN",
+                    "access": {
+                      "billingAccess": false
+                    }
+                  }
+                },
+                "manager": {
+                  "summary": "Create Manager Request",
+                  "value": {
+                    "email": "manager@myorg.com",
+                    "accounts": [1234, 6789],
+                    "firstName": "Julie",
+                    "lastName": "Lewis",
+                    "role": "MANAGER",
+                    "access": {
+                      "analyticsAccess": true,
+                      "inboxAccess": true,
+                      "libraryAccess": true
+                    }
+                  }
+                },
+                "contentScheduler": {
+                  "summary": "Create Content Scheduler Request",
+                  "value": {
+                    "email": "contentScheduler@myorg.com",
+                    "accounts": [1234, 6789],
+                    "firstName": "Bill",
+                    "lastName": "Hodges",
+                    "role": "CONTENT_SCHEDULER",
+                    "access": {
+                      "analyticsAccess": true,
+                      "inboxAccess": true,
+                      "libraryAccess": true
+                    }
+                  }
+                },
+                "client": {
+                  "summary": "Create Client Request",
+                  "value": {
+                    "email": "client@myorg.com",
+                    "accounts": [1234, 6789],
+                    "firstName": "John",
+                    "lastName": "Lewis",
+                    "role": "CLIENT",
+                    "access": {
+                      "analyticsAccess": true,
+                      "inboxAccess": true,
+                      "libraryAccess": false,
+                      "canPublish": false,
+                      "connectAccount": true,
+                      "maxConnectAccounts": "MAX",
+                      "postVisibility": "ALL",
+                      "triggerDate": 15,
+                      "autoApprove": false,
+                      "canClientApprovePosts": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error"
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/identity": {
+      "get": {
+        "summary": "Get User Identity",
+        "description": "Fetch user identity details using email address",
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "description": "Email address of the user",
+            "schema": {
+              "type": "string",
+              "format": "email",
+              "example": "adam@mymail.com"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User identity fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message",
+                    "response"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User identity fetched successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "required": [
+                        "userId"
+                      ],
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "description": "Unique user identifier",
+                          "example": "510044df21545f29e53672766eddfee9"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "User identity fetched successfully",
+                  "response": {
+                    "userId": "510044df21545f29e53672766eddfee9"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/edit": {
+      "put": {
+        "summary": "Edit a user",
+        "description": "Edit properties of a user with input validations.",
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accountCount": {
+                    "type": "number",
+                    "description": "Number of accounts user want to add"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "description": "Enter your first name"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "description": "Enter your last name"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email address of the user"
+                  }
+                }
+              },
+              "examples": {
+                "ownerEdit": {
+                  "summary": "User Edit request",
+                  "value": {
+                    "accountCount": 5,
+                    "firstName": "your name",
+                    "lastName": "your lastName",
+                    "email": "mymail@myorg.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully edited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User successfully edited"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "example": "6025f5fb8dfd8e001c7bacd2"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error"
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/role-permissions/{id}": {
+      "put": {
+        "summary": "Update user role or permissions",
+        "description": "Updates the role or access permissions of an existing user.",
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePermissionsUpdateRequest"
+              },
+              "examples": {
+                "adminUpdate": {
+                  "summary": "Update Admin Role or Permissions",
+                  "value": {
+                    "role": "ADMIN",
+                    "access": {
+                      "billingAccess": true
+                    }
+                  }
+                },
+                "managerUpdate": {
+                  "summary": "Update Manager Role or Permissions",
+                  "value": {
+                    "role": "MANAGER",
+                    "accounts": [1234, 6789],
+                    "access": {
+                      "analyticsAccess": true,
+                      "inboxAccess": true,
+                      "libraryAccess": false
+                    }
+                  }
+                },
+                "contentSchedulerUpdate": {
+                  "summary": "Update Content Scheduler Role or Permissions",
+                  "value": {
+                    "role": "CONTENT_SCHEDULER",
+                    "accounts": [1234, 6789],
+                    "access": {
+                      "analyticsAccess": true,
+                      "inboxAccess": true,
+                      "libraryAccess": false
+                    }
+                  }
+                },
+                "clientUpdate": {
+                  "summary": "Update Client Role or Permissions",
+                  "value": {
+                    "role": "CLIENT",
+                    "accounts": [1234, 6789],
+                    "access": {
+                      "analyticsAccess": true,
+                      "inboxAccess": true,
+                      "libraryAccess": false,
+                      "canPublish": false,
+                      "connectAccount": true,
+                      "maxConnectAccounts": "MAX",
+                      "postVisibility": "ALL",
+                      "triggerDate": 15,
+                      "autoApprove": false,
+                      "canClientApprovePosts": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role and permissions updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Team Updated Successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "example": "6025f5fb8dfd8e001c7bacd2"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error"
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "delete": {
+        "summary": "Delete User",
+        "description": "Deletes a user by user ID. Product-specific deletion is optional.",
+        "tags": [
+          "User Management"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "User ID to be deleted",
+            "schema": {
+              "type": "string",
+              "example": "510044df21545f29e53672766eddfee9"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": {
+                    "type": "integer",
+                    "description": "Product identifier. If not provided, user will be deleted from SocialPilot products.",
+                    "enum": [1, 2],
+                    "example": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "400"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation Failed"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Oops! Something went wrong."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/list": {
+      "get": {
+        "summary": "Group list",
+        "tags": [
+          "Group"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Page number default value = 1 if not passed"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Number of accounts displayed, default value = 10 if not passed."
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by keyword(groupName)"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string"
+            },
+            "description": "sort group list by groupName"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string"
+            },
+            "description": "sort group list by groupName with assenging or descending order, eg ASC or DESC"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group list displayed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Group list displayed successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "number",
+                          "description": "current page number"
+                        },
+                        "pageLimit": {
+                          "type": "number",
+                          "description": "page limit"
+                        },
+                        "totalRecords": {
+                          "type": "number",
+                          "description": "total records"
+                        },
+                        "totalPages": {
+                          "type": "number",
+                          "description": "total page"
+                        },
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "companyId": {
+                                "type": "number"
+                              },
+                              "createdOn": {
+                                "type": "string"
+                              },
+                              "groupId": {
+                                "type": "string"
+                              },
+                              "groupName": {
+                                "type": "string"
+                              },
+                              "totalAccount": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Group List Displayed Successfully",
+                    "response": {
+                      "currentPage": 1,
+                      "pageLimit": 10,
+                      "totalRecords": 1,
+                      "totalPages": 1,
+                      "list": [
+                        {
+                          "groupId": "groupId",
+                          "groupName": "jay123",
+                          "createdOn": "2022-09-19T10:03:01.646Z",
+                          "companyId": 100138,
+                          "accounts": [
+                            {
+                              "accountId": 9,
+                              "profilePicture": "profilePicture URL",
+                              "accountUsername": "accountUsername",
+                              "accountUrl": "accountUrl",
+                              "color": "#0177b5",
+                              "fbAppInstall": false,
+                              "isLocked": false,
+                              "isReconnect": false,
+                              "loginId": 12345,
+                              "accountMaster": {
+                                "scenario": "suitcase",
+                                "accountName": "LinkedIn Pages"
+                              }
+                            },
+                            {
+                              "accountId": 26,
+                              "profilePicture": "profilePicture URL",
+                              "accountUsername": "accountUsername",
+                              "accountUrl": "accountUrl",
+                              "color": "#0177b5",
+                              "fbAppInstall": false,
+                              "isLocked": false,
+                              "isReconnect": false,
+                              "loginId": 45676,
+                              "accountMaster": {
+                                "scenario": "youtube",
+                                "accountName": "Youtube"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error"
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Authorization Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ]
+      }
+    },
+    "/group/create": {
+      "post": {
+        "summary": "Create a Account Group",
+        "description": "Creates a new account group",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/GroupRequest"
+                  }
+                ]
+              },
+              "examples": {
+                "group": {
+                  "summary": "Create a Account Group",
+                  "value": {
+                    "groupName": "Test-Group",
+                    "groupDesc": "Testing Group of Accounts",
+                    "loginIds": [2018080, 2205366]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Group Created Successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "groupId": {
+                          "type": "string",
+                          "example": "d48532f7-d4c2-4321-a671-aee82a637b96"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code",
+                      "example": "400"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error",
+                            "example": "This group already exists. Please enter a different name."
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured",
+                            "example": "uniqueName"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/view/{groupId}": {
+      "get": {
+        "summary": "View a Group",
+        "description": "View a group",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group successfully ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Group Displayed successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "groupId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "c1a531cb-00cf-4d2b-821d-24ad3675ae97"
+                        },
+                        "groupName": {
+                          "type": "string",
+                          "example": "FiveStar"
+                        },
+                        "createdOn": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2023-08-09T11:32:44.077Z"
+                        },
+                        "companyId": {
+                          "type": "integer",
+                          "example": 1403005
+                        },
+                        "accounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountId": {
+                                "type": "integer",
+                                "example": 5
+                              },
+                              "profilePicture": {
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://graph.facebook.com/111222/picture?type=square&access_token=xyz"
+                              },
+                              "accountUsername": {
+                                "type": "string",
+                                "example": "MyPage"
+                              },
+                              "accountUrl": {
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://www.facebook.com/MyPage-111222/"
+                              },
+                              "color": {
+                                "type": "string",
+                                "example": "#3b5998"
+                              },
+                              "loginId": {
+                                "type": "integer",
+                                "example": 1794439
+                              },
+                              "scenario": {
+                                "type": "string",
+                                "example": "facebook-official"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "example": "We couldn't find this group."
+                          },
+                          "field": {
+                            "type": "string",
+                            "example": "groupId"
+                          },
+                          "extraData": {
+                            "type": "object",
+                            "example": {
+
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/update/{groupId}": {
+      "put": {
+        "summary": "Update a Group",
+        "description": "Update a group",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "groupId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "groupName": {
+                    "type": "string",
+                    "description": "Name of the group"
+                  },
+                  "groupDesc": {
+                    "type": "string",
+                    "description": "Description of the group"
+                  },
+                  "loginIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "Array of account IDs the user has access to"
+                  }
+                }
+              },
+              "examples": {
+                "group": {
+                  "summary": "Update a Group",
+                  "value": {
+                    "groupName": "Test-Group Updating",
+                    "groupDesc": "Testing Group of Accounts has been updated",
+                    "loginIds": [2018080, 2205366]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Group Updated Successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "groupId": {
+                          "type": "string",
+                          "example": "d48532f7-d4c2-4321-a671-aee82a637b96"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code",
+                      "example": "400"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error",
+                            "example": "This group already exists. Please enter a different name."
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured",
+                            "example": "uniqueName"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/delete": {
+      "delete": {
+        "summary": "Delete a Group",
+        "description": "Delete a group",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "groupIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "example": [
+                      "6098eefc-cfc2-45a3-bcba-33f75059d911"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group(s) Deleted Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Group(s) Deleted Successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation Failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "example": "The group you are trying to delete does not exist."
+                          },
+                          "field": {
+                            "type": "string",
+                            "example": "groupIds"
+                          },
+                          "extraData": {
+                            "type": "object",
+                            "example": {
+
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/deleteall": {
+      "delete": {
+        "summary": "Delete All Groups",
+        "description": "Delete all groups",
+        "tags": [
+          "Group"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "q": {
+                    "type": "string",
+                    "example": "Testing"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group(s) Deleted Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Group(s) Deleted Successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/list": {
+      "get": {
+        "summary": "account list",
+        "description": "This endpoint will display list of accounts",
+        "tags": [
+          "Accounts"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Page number default value = 1 if not passed"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Number of accounts displayed, default value = 10 if not passed."
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by keyword(Account user name)"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string"
+            },
+            "description": "sort account list by loginId, accountUsername, eg loginId ASC, accountUsername DESC"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Accounts list displayed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Accounts list displayed successfully"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "number",
+                          "description": "current page number"
+                        },
+                        "pageLimit": {
+                          "type": "number",
+                          "description": "page limit"
+                        },
+                        "totalRecords": {
+                          "type": "number",
+                          "description": "total records"
+                        },
+                        "totalPages": {
+                          "type": "number",
+                          "description": "total page"
+                        },
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "loginId": {
+                                "type": "number"
+                              },
+                              "accountId": {
+                                "type": "number"
+                              },
+                              "accountUsername": {
+                                "type": "string"
+                              },
+                              "accountUrl": {
+                                "type": "string"
+                              },
+                              "profilePicture": {
+                                "type": "string"
+                              },
+                              "isPaused": {
+                                "type": "string"
+                              },
+                              "profileUniqueId": {
+                                "type": "string"
+                              },
+                              "uniqueId": {
+                                "type": "string"
+                              },
+                              "expiryHeader": {
+                                "type": "string"
+                              },
+                              "accessToken": {
+                                "type": "string"
+                              },
+                              "pageAccessToken": {
+                                "type": "string"
+                              },
+                              "accessSecret": {
+                                "type": "string"
+                              },
+                              "systemBaseStatus": {
+                                "type": "string"
+                              },
+                              "pageId": {
+                                "type": "string"
+                              },
+                              "isLocked": {
+                                "type": "string"
+                              },
+                              "inboxCount": {
+                                "type": "number"
+                              },
+                              "fbAppInstall": {
+                                "type": "string"
+                              },
+                              "isBlocked": {
+                                "type": "string"
+                              },
+                              "shortenerId": {
+                                "type": "number"
+                              },
+                              "shortenerMaster": {
+                                "type": "object",
+                                "properties": {
+                                  "shortenerScenario": {
+                                    "type": "string"
+                                  },
+                                  "shortenerName": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "errors": {
+                                "type": "number"
+                              },
+                              "queued": {
+                                "type": "number"
+                              },
+                              "hasAnalytics": {
+                                "type": "string"
+                              },
+                              "hasInbox": {
+                                "type": "string"
+                              },
+                              "accessType": {
+                                "type": "string"
+                              },
+                              "inboxAccess": {
+                                "type": "string"
+                              },
+                              "analyticsAccess": {
+                                "type": "string"
+                              },
+                              "accountType": {
+                                "type": "string"
+                              },
+                              "color": {
+                                "type": "string"
+                              },
+                              "groups": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "number"
+                                    },
+                                    "group_name": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Accounts list displayed successfully",
+                    "response": {
+                      "currentPage": 1,
+                      "pageLimit": 10,
+                      "totalRecords": 1,
+                      "totalPages": 1,
+                      "list": [
+                        {
+                          "loginId": 21452,
+                          "accountId": 14,
+                          "accountUsername": "testing",
+                          "accountUrl": "https://www.pinterest.com/accountUsername/testing/",
+                          "profilePicture": "https://i.pinimg.com/60x60/6f/f4/3f/6ff43f8a801281d7e6fa8ddb78b4068a.jpg",
+                          "isPaused": "N",
+                          "profileUniqueId": 755127199929052700,
+                          "uniqueId": 755127131209850400,
+                          "expiryHeader": 0,
+                          "accessToken": "Ag4ir92vvbkthrNpODwrn69GeFOmFZJ5hsy6_hlCgfVgSKACTQp6wDAAAa4pRY2iHypgbpMAAAAA",
+                          "pageAccessToken": null,
+                          "accessSecret": "",
+                          "systemBaseStatus": "Y",
+                          "pageId": "",
+                          "color": "#0177b5",
+                          "isLocked": "N",
+                          "inboxCount": 0,
+                          "fbAppInstall": "N",
+                          "isBlocked": "N",
+                          "shortenerId": 2,
+                          "shortenerMaster": {
+                            "shortenerScenario": "bitly",
+                            "shortenerName": "Bitly"
+                          },
+                          "errors": 0,
+                          "queued": 0,
+                          "hasAnalytics": "Y",
+                          "hasInbox": "N",
+                          "accessType": "O",
+                          "inboxAccess": "Y",
+                          "analyticsAccess": "Y",
+                          "accountType": "pinterest-p,",
+                          "groups": [
+                            {
+                              "id": 12486,
+                              "group_name": "New Group"
+                            },
+                            {
+                              "id": 12453,
+                              "group_name": "Old Group"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "description": "Status Code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "description": "Message about the error"
+                          },
+                          "field": {
+                            "type": "string",
+                            "description": "The field in which the error has occured"
+                          },
+                          "extraData": {
+                            "type": "object",
+                            "description": "any extra data to identify what went wrong"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "Validation Error 1": {
+                    "value": {
+                      "status": 400,
+                      "message": "Validation Error",
+                      "reasons": [
+                        {
+                          "message": "Sort by incorrect format",
+                          "field": "sortBy",
+                          "extraData": {
+
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "Validation Error 2": {
+                    "value": {
+                      "status": 400,
+                      "message": "Validation Error",
+                      "reasons": [
+                        {
+                          "message": "We couldn't find this group.",
+                          "field": "groupId",
+                          "extraData": {
+
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "Validation Error 3": {
+                    "value": {
+                      "status": 400,
+                      "message": "Validation Failed",
+                      "reasons": [
+                        {
+                          "message": "Sorry! We couldn't find this client",
+                          "field": "clientId",
+                          "extraData": {
+
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "Validation Error 4": {
+                    "value": {
+                      "status": 400,
+                      "message": "Validation Failed",
+                      "reasons": [
+                        {
+                          "message": "A proper Platform Id must be provided",
+                          "field": "platform",
+                          "extraData": {
+
+                          }
+                        },
+                        {
+                          "message": "A proper team Ids must be provided",
+                          "field": "team",
+                          "extraData": {
+
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Authorization Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/draft/create": {
+      "post": {
+        "tags": [
+          "Draft"
+        ],
+        "summary": "Create Draft",
+        "description": "Create a new draft. The draft will be saved in the system and can be scheduled for posting later.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/createDraft"
+              },
+              "examples": {
+                "createTextDraft": {
+                  "summary": "Create Text Draft without media and specific account.",
+                  "value": {
+                    "postData": {
+                      "postDesc": "🚀 Elevate your brand's presence! ..."
+                    }
+                  }
+                },
+                "createImageDraft": {
+                  "summary": "Create Image Draft on specific account.",
+                  "value": {
+                    "loginIds": [1184382],
+                    "postData": {
+                      "postDesc": "🚀 Elevate your brand's presence! ...",
+                      "mediaId": [
+                        "1234-1234-1234-1234"
+                      ],
+                      "previewImgUrl": "https://www.socialpilot.co/growth-hacking/content-marketing-on-social-media.webp"
+                    }
+                  }
+                },
+                "createCarouselDraft": {
+                  "summary": "Create a carousel draft for facebook pages and schedule it.",
+                  "value": {
+                    "loginIds": [2327637, 123456],
+                    "postData": {
+                      "postDesc": "This is a test carousel post for facebook.",
+                      "mediaId": [
+                        "32be7b07-81b1-4760-aa83-f48f87f755e6",
+                        "jasdasd-fgac-9821-aa83-g48f8gf755rg"
+                      ],
+                      "carousel": [
+                        {
+                          "mediaId": "32be7b07-81b1-4760-aa83-f48f87f755e6",
+                          "title": "This is a test carousel draft for facebook.",
+                          "link": "https://socialpilot.co"
+                        },
+                        {
+                          "mediaId": "jasdasd-fgac-9821-aa83-g48f8gf755rg",
+                          "postDesc": "This is a test carousel draft for facebook.",
+                          "link": "https://socialpilot.co/blog/test-post"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "createMultiImageDraftAsDocumentOnLinkedIn": {
+                  "summary": "Create a document draft with multiple images for LinkedIn and schedule it.",
+                  "value": {
+                    "loginIds": [2327637, 123456],
+                    "postData": {
+                      "postDesc": "This is a test document draft for linkedIn.",
+                      "mediaId": [
+                        "32be7b07-81b1-4760-aa83-f48f87f755e6",
+                        "jasdasd-fgac-9821-aa83-g48f8gf755rg"
+                      ],
+                      "postImagesAsDocument": true
+                    }
+                  }
+                },
+                "createArticleDraft": {
+                  "summary": "Create Article Draft on specific account with article URL.",
+                  "value": {
+                    "loginIds": [1184382],
+                    "postData": {
+                      "postDesc": "🚀 Elevate your brand's presence! ..., read more -\u003E https://www.socialpilot.co/growth-hacking/content-marketing-on-social-media"
+                    }
+                  }
+                },
+                "createUnscheduledDraft": {
+                  "summary": "Create unscheduled text draft",
+                  "value": {
+                    "postData": {
+                      "postDesc": "🚀 Elevate your brand's presence! ..."
+                    }
+                  }
+                },
+                "createVideoDraft": {
+                  "summary": "Create Video Draft on instagram account.",
+                  "value": {
+                    "loginIds": [1184382],
+                    "postData": {
+                      "postDesc": "🚀 Elevate your brand's presence! ...",
+                      "mediaId": [
+                        "1234-1234-1234-1234"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Success message"
+                    },
+                    "response": {
+                      "type": "object",
+                      "properties": {
+                        "draftId": {
+                          "type": "string",
+                          "description": "Unique identifier for the created draft"
+                        },
+                        "userFormatDate": {
+                          "type": "string",
+                          "description": "Formatted date for user display"
+                        },
+                        "draft": {
+                          "type": "object",
+                          "properties": {
+                            "postDesc": {
+                              "type": "string",
+                              "description": "Main content of the draft post"
+                            },
+                            "postTitle": {
+                              "type": "string",
+                              "description": "Title of the draft post"
+                            },
+                            "postImage": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Array of image URLs"
+                            },
+                            "postUrl": {
+                              "type": "string",
+                              "description": "URL associated with the post"
+                            },
+                            "longPostDesc": {
+                              "type": "string",
+                              "description": "Extended post description"
+                            },
+                            "postVideo": {
+                              "type": "string",
+                              "description": "Video URL if present"
+                            },
+                            "postDocument": {
+                              "type": "string",
+                              "description": "Document URL if present"
+                            },
+                            "isPDFConvertable": {
+                              "type": "boolean",
+                              "description": "Whether the post can be converted to PDF"
+                            },
+                            "postType": {
+                              "type": "string",
+                              "description": "Type of post"
+                            },
+                            "createdOn": {
+                              "type": "string",
+                              "description": "Creation date and time"
+                            },
+                            "extraData": {
+                              "type": "object",
+                              "properties": {
+                                "place": {
+                                  "type": "object",
+                                  "nullable": true,
+                                  "description": "Location information"
+                                },
+                                "enableShortUrl": {
+                                  "type": "boolean",
+                                  "description": "Whether short URLs are enabled"
+                                },
+                                "currentActiveTab": {
+                                  "type": "string",
+                                  "description": "Currently active tab"
+                                }
+                              }
+                            },
+                            "ownerId": {
+                              "type": "integer",
+                              "description": "The ownerId is companyId/userId of the owner of the socialPilot account."
+                            },
+                            "companyId": {
+                              "type": "integer",
+                              "description": "CompanyId is the unique identifier of the users of socialPilot. CompanyId and userId are the same."
+                            },
+                            "tagIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "Associated tag IDs"
+                            },
+                            "via": {
+                              "type": "string",
+                              "description": "Source of the draft"
+                            },
+                            "account": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "isReconnect": {
+                                    "type": "boolean",
+                                    "description": "Whether account needs reconnection"
+                                  },
+                                  "accountId": {
+                                    "type": "integer",
+                                    "description": "Account identifier"
+                                  },
+                                  "profilePicture": {
+                                    "type": "string",
+                                    "description": "URL of profile picture"
+                                  },
+                                  "accountUsername": {
+                                    "type": "string",
+                                    "description": "Username of the account"
+                                  },
+                                  "accountUrl": {
+                                    "type": "string",
+                                    "description": "URL of the account"
+                                  },
+                                  "loginId": {
+                                    "type": "integer",
+                                    "description": "Login identifier"
+                                  },
+                                  "isPaused": {
+                                    "type": "boolean",
+                                    "description": "Whether account is paused"
+                                  },
+                                  "accountMaster": {
+                                    "type": "object",
+                                    "properties": {
+                                      "accountName": {
+                                        "type": "string",
+                                        "description": "Name of the account type"
+                                      },
+                                      "scenario": {
+                                        "type": "string",
+                                        "description": "Platform scenario identifier"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "accountCount": {
+                              "type": "integer",
+                              "description": "Number of accounts associated"
+                            }
+                          }
+                        },
+                        "teamList": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "display_name": {
+                                "type": "string",
+                                "description": "Display name of team member"
+                              },
+                              "companyId": {
+                                "type": "integer",
+                                "description": "CompanyId is the unique identifier of the users of socialPilot. CompanyId and userId are the same."
+                              },
+                              "companyEmail": {
+                                "type": "string",
+                                "description": "Company email address"
+                              },
+                              "role": {
+                                "type": "string",
+                                "description": "Role of team member. T=team member, C=client, A=admin, M=manager"
+                              }
+                            }
+                          }
+                        },
+                        "commentDetail": {
+                          "type": "object",
+                          "properties": {
+                            "userFormatDate": {
+                              "type": "string",
+                              "description": "Formatted date for user display"
+                            },
+                            "utcTime": {
+                              "type": "string",
+                              "format": "date-time",
+                              "description": "UTC timestamp"
+                            },
+                            "ownerId": {
+                              "type": "integer",
+                              "description": "The ownerId is companyId/userId of the owner of the socialPilot account."
+                            },
+                            "companyId": {
+                              "type": "integer",
+                              "description": "CompanyId is the unique identifier of the users of socialPilot. CompanyId and userId are the same."
+                            },
+                            "postId": {
+                              "type": "string",
+                              "description": "Unique identifier for the post"
+                            },
+                            "message": {
+                              "type": "string",
+                              "description": "Comment message"
+                            },
+                            "isPublic": {
+                              "type": "boolean",
+                              "description": "Whether comment is public"
+                            },
+                            "isDeleted": {
+                              "type": "boolean",
+                              "description": "Whether comment is deleted"
+                            },
+                            "type": {
+                              "type": "string",
+                              "description": "Type of comment"
+                            },
+                            "userName": {
+                              "type": "string",
+                              "description": "Name of the user"
+                            },
+                            "postCreatedBy": {
+                              "type": "integer",
+                              "description": "User ID who created the post"
+                            },
+                            "postStatus": {
+                              "type": "string",
+                              "description": "Status of the post"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "example": {
+                    "message": "Your post has been saved as draft.",
+                    "response": {
+                      "draftId": "fb977786-f350-4ba7-b6eb-94934207567a",
+                      "draft": {
+                        "postDesc": "Draft che aa.",
+                        "postTitle": "",
+                        "postImage": [],
+                        "postUrl": "",
+                        "longPostDesc": "",
+                        "postVideo": "",
+                        "postDocument": "",
+                        "isPDFConvertable": false,
+                        "companyId": 111028,
+                        "postType": "T",
+                        "createdOn": "02-19-2025 03:28 PM",
+                        "extraData": {
+                          "place": null,
+                          "enableShortUrl": false,
+                          "currentActiveTab": "original"
+                        },
+                        "ownerId": 111028,
+                        "tagIds": [],
+                        "via": "Web",
+                        "account": [
+                          {
+                            "isReconnect": false,
+                            "accountId": 25,
+                            "profilePicture": "https://scontent-iad3-1.xx.fbcdn.net/v/t51.2885-15/429330064_1036225800806717_6775225919247454690_n.jpg",
+                            "accountUsername": "joy trump",
+                            "accountUrl": "https://www.instagram.com/joy_trump_new",
+                            "loginId": 1184382,
+                            "isPaused": false,
+                            "accountMaster": {
+                              "accountName": "Instagram+Pages",
+                              "scenario": "instagram-bussiness-pages"
+                            }
+                          }
+                        ],
+                        "accountCount": 1
+                      },
+                      "teamList": [
+                        {
+                          "display_name": "Mary Jane",
+                          "companyId": 113980,
+                          "companyEmail": "merijaan@givmail.com",
+                          "role": "A"
+                        }
+                      ],
+                      "commentDetail": {
+                        "userFormatDate": "02-19-2025 03:28 PM",
+                        "utcTime": "2025-02-19T09:58:20.057Z",
+                        "ownerId": 111028,
+                        "companyId": 111028,
+                        "postId": "fb977786-f350-4ba7-b6eb-94934207567a",
+                        "message": "created draft post.",
+                        "isPublic": true,
+                        "isDeleted": false,
+                        "type": "DB",
+                        "userName": "Margish Patel",
+                        "postCreatedBy": 111028,
+                        "postStatus": "CD"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid request parameters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Authorization Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "email"
+            ]
+          }
+        ]
+      }
+    },
+    "/uploadmedia": {
+      "post": {
+        "summary": "Upload media file",
+        "description": "Uploads a file reference using its file id. This file should be an image created by DALL·E or uploaded by the user. JPG, WEBP and PNG are supported for post creation.",
+        "tags": [
+          "Misc"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "mediaType",
+                  "media"
+                ],
+                "properties": {
+                  "mediaType": {
+                    "type": "string",
+                    "description": "It will be type of media and it should be one from the below mentioned media type.",
+                    "enum": [
+                      "IMAGE",
+                      "VIDEO",
+                      "GIF"
+                    ]
+                  },
+                  "media": {
+                    "type": "array",
+                    "description": "Media url to be uploaded, if user provides media url then openaiFileIdRefs will be empty array. Don't pass any value in this field other than media url provided by user.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "url"
+                      ],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "description": "Media url to be uploaded",
+                          "format": "uri"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "Media url provided by user": {
+                  "summary": "User provided public media url",
+                  "value": {
+                    "mediaType": "IMAGE",
+                    "media": [
+                      {
+                        "url": "https://imageurl.png"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returned media ids successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "response": {
+                      "properties": {
+                        "mediaIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "properties": {
+                              "mediaId": {
+                                "type": "string"
+                              },
+                              "media": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "message": "Returned media ids successfully",
+                  "response": {
+                    "mediaIds": [
+                      {
+                        "media": "https://awsstage-test.s3.amazonaws.com/100138/a6291714-ad55-4575-8862-ef2110a758ab.jpeg",
+                        "mediaId": "3a735b35-2ca2-4d2f-9b8d-e79cf8abb34f"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Status Code"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Message to understand what went wrong"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "url": {
+                            "type": "string",
+                            "description": "Media url in which error has occurred"
+                          },
+                          "isValid": {
+                            "type": "boolean"
+                          },
+                          "errorMessage": {
+                            "type": "string",
+                            "description": "Message about the error"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "value": {
+                    "status": 400,
+                    "message": "Validation Failed.",
+                    "reasons": [
+                      {
+                        "url": "https://imageurl.png",
+                        "isValid": false,
+                        "errorMessage": "Invalid request url"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Authorization Error"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Internal Server Error"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "email"
+            ]
+          }
+        ]
+      }
+    },
+    "/posts/delete": {
+      "delete": {
+        "summary": "Delete a Post",
+        "description": "Delete a post",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "postIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "example": [
+                      "6098eefc-cfc2-45a3-bcba-33f75059d911"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "1 out of 1 post(s) deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "1 out of 1 post(s) deleted successfully."
+                    },
+                    "extraResponse": {
+                      "type": "object",
+                      "properties": {
+                        "success": {
+                          "type": "boolean",
+                          "example": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Invalid user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscription/downgrade": {
+      "post": {
+        "summary": "Downgrade Membership",
+        "description": "Downgrades membership for selected products (SocialPilot, Reviews, or both).",
+        "tags": [
+          "Membership"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "products": {
+                    "type": "array",
+                    "description": "Product identifiers. 1 = SocialPilot, 2 = Reviews. Empty or not passed means SocialPilot.",
+                    "items": {
+                      "type": "integer",
+                      "enum": [1, 2]
+                    },
+                    "example": [1]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "You've successfully downgraded your membership.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "You've successfully downgraded your membership."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "400"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "example": "Invalid product ids provided."
+                          },
+                          "field": {
+                            "type": "string",
+                            "example": "productId"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Opps! Something went wrong."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscription/reactivate": {
+      "post": {
+        "summary": "Reactivate Membership",
+        "description": "Reactivates membership for a selected product or all products.",
+        "tags": [
+          "Membership"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": {
+                    "type": "integer",
+                    "description": "Product identifier. 1 = SocialPilot, 2 = Reviews. If not provided, then SocialPilot will be reactivated.",
+                    "enum": [1, 2],
+                    "example": 1
+                  },
+                  "membershipId": {
+                    "type": "integer",
+                    "description": "Optional membership ID. If not provided, the previous membership will be used.",
+                    "example": 1005
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "You've successfully reactivated your membership.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "You've successfully reactivated your membership."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "400"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "example": "Invalid productId provided."
+                          },
+                          "field": {
+                            "type": "string",
+                            "example": "productId"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Oops! Something went wrong."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscription/switch-plan": {
+      "post": {
+        "summary": "Change Membership Plan",
+        "description": "Changes the membership plan. If productId is not provided, the plan will be applied to the SocialPilot.",
+        "tags": [
+          "Membership"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "ownerId": []
+          },
+          {
+            "userId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "membershipId"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "integer",
+                    "description": "Product identifier. Optional.",
+                    "enum": [1, 2],
+                    "example": 1
+                  },
+                  "membershipId": {
+                    "type": "integer",
+                    "description": "Target plan identifier.",
+                    "example": 1005
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Membership plan changed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Membership plan changed successfully."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "400"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Validation Failed"
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "example": "Invalid membershipId or productId."
+                          },
+                          "field": {
+                            "type": "string",
+                            "example": "membershipId"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Oops! Something went wrong."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Returns service health status",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Service is in severe state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "severe"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminAccess": {
+        "type": "object",
+        "description": "Access configuration for Admin role",
+        "properties": {
+          "billingAccess": {
+            "type": "boolean",
+            "description": "Access to subscription and billing settings",
+            "example": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "ManagerAccess": {
+        "type": "object",
+        "description": "Access configuration for Manager role",
+        "properties": {
+          "analyticsAccess": {
+            "type": "boolean",
+            "description": "Grants permission to view analytics data and reports for assigned accounts.",
+            "example": true
+          },
+          "inboxAccess": {
+            "description": "Grants access to the Social Inbox module, enabling the user to view, manage, and respond to messages, comments, and conversations across permitted accounts.",
+            "type": "boolean",
+            "example": true
+          },
+          "libraryAccess": {
+            "type": "boolean",
+            "description": "Grants access to the content library for viewing and using saved media assets and content while creating posts.",
+            "example": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentSchedulerAccess": {
+        "type": "object",
+        "description": "Access configuration for Content Scheduler role",
+        "properties": {
+          "analyticsAccess": {
+            "type": "boolean",
+            "description": "Grants permission to view analytics data and reports for assigned accounts.",
+            "example": true
+          },
+          "inboxAccess": {
+            "type": "boolean",
+            "description": "Grants access to the Social Inbox module, enabling the user to view, manage, and respond to messages, comments, and conversations across permitted accounts.",
+            "example": true
+          },
+          "libraryAccess": {
+            "type": "boolean",
+            "description": "Grants access to the content library for viewing and using saved media assets and content while creating posts.",
+            "example": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClientAccess": {
+        "type": "object",
+        "description": "Access configuration for Client role",
+        "properties": {
+          "analyticsAccess": {
+            "type": "boolean",
+            "description": "Grants permission to view analytics data and reports for assigned accounts.",
+            "example": true
+          },
+          "inboxAccess": {
+            "type": "boolean",
+            "description": "Grants access to the Social Inbox module, enabling the user to view, manage, and respond to messages, comments, and conversations across permitted accounts.",
+            "example": true
+          },
+          "libraryAccess": {
+            "type": "boolean",
+            "description": "Grants access to the content library for viewing and using saved media assets and content while creating posts.",
+            "example": false
+          },
+          "canPublish": {
+            "type": "boolean",
+            "description": "Client can publish posts",
+            "example": true
+          },
+          "connectAccount": {
+            "type": "boolean",
+            "description": "Client can connect social accounts",
+            "example": true
+          },
+          "maxConnectAccounts": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "MAX"
+                ],
+                "example": "MAX"
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "example": 6
+              }
+            ],
+            "description": "Maximum accounts client can connect. 'MAX' for unlimited or a number."
+          },
+          "postVisibility": {
+            "oneOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ALL"
+                ],
+                "example": "ALL"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "example": [1, 2, 3]
+              }
+            ],
+            "description": "Visibility scope of posts: ALL or specific Months"
+          },
+          "triggerDate": {
+            "description": "Date when the post should be triggered for client Visibility.",
+            "oneOf": [
+              {
+                "type": "integer",
+                "enum": [31],
+                "example": 31
+              },
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 27,
+                "example": 6
+              }
+            ]
+          },
+          "autoApprove": {
+            "type": "boolean",
+            "description": "Auto approve posts without manual approval",
+            "example": false
+          },
+          "canClientApprovePosts": {
+            "type": "boolean",
+            "description": "can client approve posts",
+            "example": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the user"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Array of account IDs the user has access to"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "User's first name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "User's last name"
+          },
+          "role": {
+            "type": "string",
+            "description": "User role: Manager  "
+          },
+          "access": {
+            "type": "object",
+            "description": "Role-based access permissions (varies by role)"
+          }
+        }
+      },
+      "ManagerRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "default": "MANAGER"
+              },
+              "access": {
+                "$ref": "#/components/schemas/ManagerAccess"
+              }
+            }
+          }
+        ]
+      },
+      "AdminRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "default": "ADMIN"
+              },
+              "access": {
+                "$ref": "#/components/schemas/AdminAccess"
+              }
+            }
+          }
+        ]
+      },
+      "ContentSchedulerRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "default": "CONTENT_SCHEDULER"
+              },
+              "access": {
+                "$ref": "#/components/schemas/ContentSchedulerAccess"
+              }
+            }
+          }
+        ]
+      },
+      "ClientRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string",
+                "default": "CLIENT"
+              },
+              "access": {
+                "$ref": "#/components/schemas/ClientAccess"
+              }
+            }
+          }
+        ]
+      },
+      "OwnerCreateRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "firstname",
+          "lastname"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the user"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "User's first name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "User's last name"
+          },
+          "accountCount": {
+            "type": "number",
+            "description": "Number of accounts user want to add"
+          }
+        }
+      },
+      "RolePermissionsUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MANAGER",
+              "CONTENT_SCHEDULER",
+              "CLIENT",
+              "A",
+              "M",
+              "C",
+              "CL"
+            ],
+            "description": "Role to be assigned to the user. Supported values: A (Admin), M (Manager), C (Content Scheduler), CL (Client). You may also use full role labels such as ADMIN, MANAGER, CONTENT_SCHEDULER, or CLIENT."
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "Required for account-scoped roles like MANAGER, CONTENT_SCHEDULER, and CLIENT",
+            "example": [1234, 5678]
+          },
+          "access": {
+            "description": "Role-specific access configuration",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AdminAccess"
+              },
+              {
+                "$ref": "#/components/schemas/ManagerAccess"
+              },
+              {
+                "$ref": "#/components/schemas/ContentSchedulerAccess"
+              },
+              {
+                "$ref": "#/components/schemas/ClientAccess"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "User successfully created"
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "example": "6025f5fb8dfd8e001c7bacd2"
+              }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "Invalid request parameters"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Email is required",
+              "Invalid access type"
+            ]
+          }
+        }
+      },
+      "GroupRequest": {
+        "type": "object",
+        "required": [
+          "groupName",
+          "groupDesc",
+          "loginIds"
+        ],
+        "properties": {
+          "groupName": {
+            "type": "string",
+            "description": "Name of the group",
+            "example": "Test-Group"
+          },
+          "groupDesc": {
+            "type": "string",
+            "description": "Description of the group",
+            "example": "Testing Group of Accounts"
+          },
+          "loginIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Login ID selected by the user (social media accounts).",
+              "example": 2018080
+            },
+            "description": "Array of Login IDs selected by the user (social media accounts)."
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "400"
+          },
+          "message": {
+            "type": "string",
+            "example": "Validation Failed"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "postDesc is required."
+                },
+                "field": {
+                  "type": "string",
+                  "example": "postDesc"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "Invalid user"
+          }
+        }
+      },
+      "DraftCreateResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "draftId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "draft": {
+                "$ref": "#/components/schemas/DraftDetail"
+              },
+              "teamList": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "commentDetail": {
+                "$ref": "#/components/schemas/CommentDetail"
+              }
+            }
+          }
+        }
+      },
+      "DraftDetail": {
+        "type": "object",
+        "properties": {
+          "draftId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "postDesc": {
+            "type": "string"
+          },
+          "postTitle": {
+            "type": "string"
+          },
+          "postImage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "postUrl": {
+            "type": "string"
+          },
+          "longPostDesc": {
+            "type": "string"
+          },
+          "postVideo": {
+            "type": "string"
+          },
+          "postDocument": {
+            "type": "string"
+          },
+          "isPDFConvertable": {
+            "type": "boolean"
+          },
+          "companyId": {
+            "type": "integer"
+          },
+          "ownerId": {
+            "type": "integer"
+          },
+          "postType": {
+            "type": "string",
+            "description": "Type of post (T = Text)"
+          },
+          "createdOn": {
+            "type": "string",
+            "description": "Human-readable creation date"
+          },
+          "via": {
+            "type": "string",
+            "description": "Source platform (Web, API, Mobile)"
+          },
+          "loginIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "accountCount": {
+            "type": "integer"
+          },
+          "account": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountInfo"
+            }
+          },
+          "taggedPeople": {
+            "type": "object"
+          },
+          "collaborators": {
+            "type": "object"
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isFromSaveLibrary": {
+            "type": "boolean"
+          },
+          "extraData": {
+            "type": "object",
+            "properties": {
+              "enableShortUrl": {
+                "type": "boolean"
+              },
+              "original": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              },
+              "fb": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              },
+              "instagram": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DraftPlatformConfig"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "instagramPostType": {
+                        "type": "string"
+                      },
+                      "instagramPublishType": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              },
+              "linkedin": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              },
+              "youtube": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DraftPlatformConfig"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "youtubePrivacy": {
+                        "type": "string"
+                      },
+                      "youtubeTags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "tiktok": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DraftPlatformConfig"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "tiktokDirectPublish": {
+                        "type": "boolean"
+                      },
+                      "tiktokPrivacy": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              },
+              "twitter": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              },
+              "pinterest": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DraftPlatformConfig"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "destinationUrl": {
+                        "type": "string"
+                      },
+                      "pinTitle": {
+                        "type": "string"
+                      },
+                      "pinAltText": {
+                        "type": "string"
+                      },
+                      "sameTextAndUrl": {
+                        "type": "boolean"
+                      },
+                      "previewImgUrl": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              },
+              "threads": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              },
+              "bluesky": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              },
+              "gmb": {
+                "$ref": "#/components/schemas/DraftPlatformConfig"
+              }
+            }
+          }
+        }
+      },
+      "DraftPlatformConfig": {
+        "type": "object",
+        "description": "Generic per-platform structure.",
+        "additionalProperties": true,
+        "properties": {
+          "postDesc": {
+            "type": "string"
+          },
+          "postTitle": {
+            "type": "string"
+          },
+          "postImage": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "postUrl": {
+            "type": "string"
+          },
+          "longPostDesc": {
+            "type": "string"
+          },
+          "postVideo": {
+            "type": "string"
+          },
+          "postDocument": {
+            "type": "string"
+          },
+          "isPDFConvertable": {
+            "type": "boolean"
+          },
+          "companyId": {
+            "type": "integer"
+          },
+          "postType": {
+            "type": "string"
+          },
+          "createdOn": {
+            "type": "string"
+          },
+          "extraData": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "ownerId": {
+            "type": "integer"
+          },
+          "taggedPeople": {
+            "type": "object"
+          },
+          "collaborators": {
+            "type": "object"
+          },
+          "utmSetId": {
+            "type": "string"
+          },
+          "utmParameters": {
+            "type": "object"
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isFromSaveLibrary": {
+            "type": "boolean"
+          },
+          "via": {
+            "type": "string"
+          }
+        }
+      },
+      "createDraft": {
+        "type": "object",
+        "required": [
+          "postData"
+        ],
+        "properties": {
+          "loginIds": {
+            "type": "array",
+            "description": "Accounts to attach the draft to",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "postData": {
+            "type": "object",
+            "required": [
+              "postDesc"
+            ],
+            "properties": {
+              "postDesc": {
+                "type": "string",
+                "description": "Main text/caption"
+              },
+              "mediaId": {
+                "type": "array",
+                "description": "Uploaded media IDs to attach",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "previewImgUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "Preview image URL (e.g., for Pinterest)"
+              },
+              "postImagesAsDocument": {
+                "type": "boolean",
+                "description": "Treat multiple images as a document (e.g., LinkedIn)"
+              },
+              "carousel": {
+                "type": "array",
+                "description": "Per-card data for Facebook carousel",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "mediaId"
+                  ],
+                  "properties": {
+                    "mediaId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "postDesc": {
+                      "type": "string"
+                    },
+                    "link": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountInfo": {
+        "type": "object",
+        "properties": {
+          "loginId": {
+            "type": "integer",
+            "example": 1189580
+          },
+          "accountId": {
+            "type": "integer",
+            "example": 5
+          },
+          "accountUsername": {
+            "type": "string",
+            "example": "Masoom3"
+          },
+          "accountUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://www.facebook.com/Masoom3-707476029117147/"
+          },
+          "profilePicture": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/profile.jpg"
+          },
+          "isReconnect": {
+            "type": "boolean",
+            "example": false
+          },
+          "isPaused": {
+            "type": "boolean",
+            "example": false
+          },
+          "accountMaster": {
+            "type": "object",
+            "properties": {
+              "accountName": {
+                "type": "string",
+                "example": "Facebook Pages"
+              },
+              "scenario": {
+                "type": "string",
+                "example": "facebook-official"
+              }
+            }
+          }
+        }
+      },
+      "CommentDetail": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "81718c95-3f7b-42b1-a27e-9e69668250b6"
+          },
+          "postId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "5973bb0a-0f98-4192-bb02-70c9d16e16fa"
+          },
+          "message": {
+            "type": "string",
+            "example": "created draft post."
+          },
+          "userName": {
+            "type": "string",
+            "example": "Parth Parsaniya"
+          },
+          "userFormatDate": {
+            "type": "string",
+            "example": "Nov 04, 2025 07:19 AM"
+          },
+          "utcTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-04T12:19:00.928Z"
+          },
+          "ownerId": {
+            "type": "integer",
+            "example": 117265
+          },
+          "companyId": {
+            "type": "integer",
+            "example": 117265
+          },
+          "postCreatedBy": {
+            "type": "integer",
+            "example": 117265
+          },
+          "postStatus": {
+            "type": "string",
+            "example": "CD",
+            "description": "Status code (CD = Created Draft)"
+          },
+          "type": {
+            "type": "string",
+            "example": "DB",
+            "description": "Comment type (DB = Draft Board)"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "example": true
+          },
+          "isDeleted": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "API key for authentication"
+      },
+      "ownerId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-owner-id",
+        "description": "Owner ID for request authorization"
+      },
+      "userId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-user-id",
+        "description": "User ID for request authorization"
+      }
+    }
+  }
+}

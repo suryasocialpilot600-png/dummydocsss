@@ -1,21 +1,18 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "willow",
+  "theme": "mint",
   "name": "dummydoc",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0f67ea",
+    "light": "#0f67ea",
+    "dark": "#0f67ea"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
         "tab": "Documentation",
-        "pages": [
-          "index",
-          "quickstart"
-        ]
+        "pages": ["index", "quickstart"]
       },
       {
         "tab": "API Reference",

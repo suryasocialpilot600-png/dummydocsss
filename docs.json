@@ -7,7 +7,7 @@
     "light": "#0f67ea",
     "dark": "#0f67ea"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/favicon-v2.png",
   "navigation": {
     "tabs": [
       {
@@ -18,21 +18,7 @@
         "tab": "API Reference",
         "openapi": "openapi.json"
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -42,14 +28,9 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "mailto:support@socialpilot.co"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
-    }
+    ]
   },
   "contextual": {
     "options": [

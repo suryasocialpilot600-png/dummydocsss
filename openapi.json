@@ -7,8 +7,12 @@
   },
   "servers": [
     {
-      "url": "https://staging-api.socialpilot.co/uat",
+      "url": "https://uat-api.socialpilot.co/uat",
       "description": "UAT server"
+    },
+    {
+      "url": "https://staging-api.socialpilot.co",
+      "description": "Staging server"
     }
   ],
   "paths": {
@@ -16,9 +20,7 @@
       "get": {
         "summary": "Generate authentication token",
         "description": "Generates an authentication token for the specified user id",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [
           {
             "apiKey": []
@@ -130,9 +132,7 @@
       "post": {
         "summary": "Create a new user",
         "description": "Creates a new user with specific role-based permissions",
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "security": [
           {
             "apiKey": []
@@ -314,9 +314,7 @@
       "get": {
         "summary": "Get User Identity",
         "description": "Fetch user identity details using email address",
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "security": [
           {
             "apiKey": []
@@ -345,10 +343,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": [
-                    "message",
-                    "response"
-                  ],
+                  "required": ["message", "response"],
                   "properties": {
                     "message": {
                       "type": "string",
@@ -356,9 +351,7 @@
                     },
                     "response": {
                       "type": "object",
-                      "required": [
-                        "userId"
-                      ],
+                      "required": ["userId"],
                       "properties": {
                         "userId": {
                           "type": "string",
@@ -415,9 +408,7 @@
       "put": {
         "summary": "Edit a user",
         "description": "Edit properties of a user with input validations.",
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "security": [
           {
             "apiKey": []
@@ -557,9 +548,7 @@
       "put": {
         "summary": "Update user role or permissions",
         "description": "Updates the role or access permissions of an existing user.",
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "security": [
           {
             "apiKey": []
@@ -734,9 +723,7 @@
       "delete": {
         "summary": "Delete User",
         "description": "Deletes a user by user ID. Product-specific deletion is optional.",
-        "tags": [
-          "User Management"
-        ],
+        "tags": ["User Management"],
         "security": [
           {
             "apiKey": []
@@ -852,9 +839,7 @@
     "/group/list": {
       "get": {
         "summary": "Group list",
-        "tags": [
-          "Group"
-        ],
+        "tags": ["Group"],
         "parameters": [
           {
             "in": "query",
@@ -1098,9 +1083,7 @@
       "post": {
         "summary": "Create a Account Group",
         "description": "Creates a new account group",
-        "tags": [
-          "Group"
-        ],
+        "tags": ["Group"],
         "security": [
           {
             "apiKey": []
@@ -1226,9 +1209,7 @@
       "get": {
         "summary": "View a Group",
         "description": "View a group",
-        "tags": [
-          "Group"
-        ],
+        "tags": ["Group"],
         "security": [
           {
             "apiKey": []
@@ -1357,9 +1338,7 @@
                           },
                           "extraData": {
                             "type": "object",
-                            "example": {
-
-                            }
+                            "example": {}
                           }
                         }
                       }
@@ -1396,9 +1375,7 @@
       "put": {
         "summary": "Update a Group",
         "description": "Update a group",
-        "tags": [
-          "Group"
-        ],
+        "tags": ["Group"],
         "security": [
           {
             "apiKey": []
@@ -1547,9 +1524,7 @@
       "delete": {
         "summary": "Delete a Group",
         "description": "Delete a group",
-        "tags": [
-          "Group"
-        ],
+        "tags": ["Group"],
         "security": [
           {
             "apiKey": []
@@ -1574,9 +1549,7 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "example": [
-                      "6098eefc-cfc2-45a3-bcba-33f75059d911"
-                    ]
+                    "example": ["6098eefc-cfc2-45a3-bcba-33f75059d911"]
                   }
                 }
               }
@@ -1630,9 +1603,7 @@
                           },
                           "extraData": {
                             "type": "object",
-                            "example": {
-
-                            }
+                            "example": {}
                           }
                         }
                       }
@@ -1669,9 +1640,7 @@
       "delete": {
         "summary": "Delete All Groups",
         "description": "Delete all groups",
-        "tags": [
-          "Group"
-        ],
+        "tags": ["Group"],
         "security": [
           {
             "apiKey": []
@@ -1743,9 +1712,7 @@
       "get": {
         "summary": "account list",
         "description": "This endpoint will display list of accounts",
-        "tags": [
-          "Accounts"
-        ],
+        "tags": ["Accounts"],
         "security": [
           {
             "apiKey": []
@@ -2041,9 +2008,7 @@
                         {
                           "message": "Sort by incorrect format",
                           "field": "sortBy",
-                          "extraData": {
-
-                          }
+                          "extraData": {}
                         }
                       ]
                     }
@@ -2056,9 +2021,7 @@
                         {
                           "message": "We couldn't find this group.",
                           "field": "groupId",
-                          "extraData": {
-
-                          }
+                          "extraData": {}
                         }
                       ]
                     }
@@ -2071,9 +2034,7 @@
                         {
                           "message": "Sorry! We couldn't find this client",
                           "field": "clientId",
-                          "extraData": {
-
-                          }
+                          "extraData": {}
                         }
                       ]
                     }
@@ -2086,16 +2047,12 @@
                         {
                           "message": "A proper Platform Id must be provided",
                           "field": "platform",
-                          "extraData": {
-
-                          }
+                          "extraData": {}
                         },
                         {
                           "message": "A proper team Ids must be provided",
                           "field": "team",
-                          "extraData": {
-
-                          }
+                          "extraData": {}
                         }
                       ]
                     }
@@ -2149,9 +2106,7 @@
     },
     "/draft/create": {
       "post": {
-        "tags": [
-          "Draft"
-        ],
+        "tags": ["Draft"],
         "summary": "Create Draft",
         "description": "Create a new draft. The draft will be saved in the system and can be scheduled for posting later.",
         "requestBody": {
@@ -2176,9 +2131,7 @@
                     "loginIds": [1184382],
                     "postData": {
                       "postDesc": "🚀 Elevate your brand's presence! ...",
-                      "mediaId": [
-                        "1234-1234-1234-1234"
-                      ],
+                      "mediaId": ["1234-1234-1234-1234"],
                       "previewImgUrl": "https://www.socialpilot.co/growth-hacking/content-marketing-on-social-media.webp"
                     }
                   }
@@ -2245,9 +2198,7 @@
                     "loginIds": [1184382],
                     "postData": {
                       "postDesc": "🚀 Elevate your brand's presence! ...",
-                      "mediaId": [
-                        "1234-1234-1234-1234"
-                      ]
+                      "mediaId": ["1234-1234-1234-1234"]
                     }
                   }
                 }
@@ -2626,9 +2577,7 @@
         },
         "security": [
           {
-            "OAuth2": [
-              "email"
-            ]
+            "OAuth2": ["email"]
           }
         ]
       }
@@ -2637,36 +2586,25 @@
       "post": {
         "summary": "Upload media file",
         "description": "Uploads a file reference using its file id. This file should be an image created by DALL·E or uploaded by the user. JPG, WEBP and PNG are supported for post creation.",
-        "tags": [
-          "Misc"
-        ],
+        "tags": ["Misc"],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "mediaType",
-                  "media"
-                ],
+                "required": ["mediaType", "media"],
                 "properties": {
                   "mediaType": {
                     "type": "string",
                     "description": "It will be type of media and it should be one from the below mentioned media type.",
-                    "enum": [
-                      "IMAGE",
-                      "VIDEO",
-                      "GIF"
-                    ]
+                    "enum": ["IMAGE", "VIDEO", "GIF"]
                   },
                   "media": {
                     "type": "array",
                     "description": "Media url to be uploaded, if user provides media url then openaiFileIdRefs will be empty array. Don't pass any value in this field other than media url provided by user.",
                     "items": {
                       "type": "object",
-                      "required": [
-                        "url"
-                      ],
+                      "required": ["url"],
                       "properties": {
                         "url": {
                           "type": "string",
@@ -2829,9 +2767,7 @@
         },
         "security": [
           {
-            "OAuth2": [
-              "email"
-            ]
+            "OAuth2": ["email"]
           }
         ]
       }
@@ -2840,9 +2776,7 @@
       "delete": {
         "summary": "Delete a Post",
         "description": "Delete a post",
-        "tags": [
-          "Post"
-        ],
+        "tags": ["Post"],
         "security": [
           {
             "apiKey": []
@@ -2861,9 +2795,7 @@
                       "type": "string",
                       "format": "uuid"
                     },
-                    "example": [
-                      "6098eefc-cfc2-45a3-bcba-33f75059d911"
-                    ]
+                    "example": ["6098eefc-cfc2-45a3-bcba-33f75059d911"]
                   }
                 }
               }
@@ -2923,9 +2855,7 @@
       "post": {
         "summary": "Downgrade Membership",
         "description": "Downgrades membership for selected products (SocialPilot, Reviews, or both).",
-        "tags": [
-          "Membership"
-        ],
+        "tags": ["Membership"],
         "security": [
           {
             "apiKey": []
@@ -3052,9 +2982,7 @@
       "post": {
         "summary": "Reactivate Membership",
         "description": "Reactivates membership for a selected product or all products.",
-        "tags": [
-          "Membership"
-        ],
+        "tags": ["Membership"],
         "security": [
           {
             "apiKey": []
@@ -3183,9 +3111,7 @@
       "post": {
         "summary": "Change Membership Plan",
         "description": "Changes the membership plan. If productId is not provided, the plan will be applied to the SocialPilot.",
-        "tags": [
-          "Membership"
-        ],
+        "tags": ["Membership"],
         "security": [
           {
             "apiKey": []
@@ -3203,9 +3129,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "membershipId"
-                ],
+                "required": ["membershipId"],
                 "properties": {
                   "productId": {
                     "type": "integer",
@@ -3317,9 +3241,7 @@
       "get": {
         "summary": "Health Check",
         "description": "Returns service health status",
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "responses": {
           "200": {
             "description": "Service is healthy",
@@ -3448,9 +3370,7 @@
             "oneOf": [
               {
                 "type": "string",
-                "enum": [
-                  "MAX"
-                ],
+                "enum": ["MAX"],
                 "example": "MAX"
               },
               {
@@ -3466,9 +3386,7 @@
             "oneOf": [
               {
                 "type": "string",
-                "enum": [
-                  "ALL"
-                ],
+                "enum": ["ALL"],
                 "example": "ALL"
               },
               {
@@ -3512,9 +3430,7 @@
       },
       "UserRequest": {
         "type": "object",
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "properties": {
           "email": {
             "type": "string",
@@ -3624,11 +3540,7 @@
       },
       "OwnerCreateRequest": {
         "type": "object",
-        "required": [
-          "email",
-          "firstname",
-          "lastname"
-        ],
+        "required": ["email", "firstname", "lastname"],
         "properties": {
           "email": {
             "type": "string",
@@ -3732,20 +3644,13 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "Email is required",
-              "Invalid access type"
-            ]
+            "example": ["Email is required", "Invalid access type"]
           }
         }
       },
       "GroupRequest": {
         "type": "object",
-        "required": [
-          "groupName",
-          "groupDesc",
-          "loginIds"
-        ],
+        "required": ["groupName", "groupDesc", "loginIds"],
         "properties": {
           "groupName": {
             "type": "string",
@@ -4117,9 +4022,7 @@
       },
       "createDraft": {
         "type": "object",
-        "required": [
-          "postData"
-        ],
+        "required": ["postData"],
         "properties": {
           "loginIds": {
             "type": "array",
@@ -4130,9 +4033,7 @@
           },
           "postData": {
             "type": "object",
-            "required": [
-              "postDesc"
-            ],
+            "required": ["postDesc"],
             "properties": {
               "postDesc": {
                 "type": "string",
@@ -4160,9 +4061,7 @@
                 "description": "Per-card data for Facebook carousel",
                 "items": {
                   "type": "object",
-                  "required": [
-                    "mediaId"
-                  ],
+                  "required": ["mediaId"],
                   "properties": {
                     "mediaId": {
                       "type": "string",

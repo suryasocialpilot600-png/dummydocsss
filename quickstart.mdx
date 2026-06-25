@@ -1,47 +1,59 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Start managing team members using the SocialPilot API"
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+This guide helps you authenticate and make your first API request to manage users.
 
 ## Prerequisites
 
-Before you begin, you must have:
+Before you begin, make sure you have:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- A SocialPilot account
+- An API Key from your **Settings** dashboard
 
 ## Get started
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Generate authentication token">
+    Retrieve an authentication JSON Web Token (JWT) using your API key. Make a `GET` request to `/generate-token`. Include the `userId` in your query parameters.
 
     ```bash
-    npm install your-package
+    curl -X GET "https://staging-api.socialpilot.co/generate-token?userId=123" \
+      -H "apiKey: YOUR_API_KEY"
     ```
+
+    Save the token from the response. It expires after the duration specified in `expiresIn`.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+
+  <Step title="Authenticate requests">
+    Use the retrieved JWT token in the authentication header for all user management endpoints. Set the header key based on your authentication mechanism.
+  </Step>
+
+  <Step title="Create a team member">
+    Send a `POST` request to `/user/create` to provision a new user. You can assign roles such as `OWNER`, `ADMIN`, `MANAGER`, `CONTENT_SCHEDULER`, or `CLIENT`.
 
     ```bash
-    your-cli init
-    ```
-  </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
-
-    ```bash
-    your-cli start
+    curl -X POST "https://staging-api.socialpilot.co/user/create" \
+      -H "apiKey: YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "manager@myorg.com",
+        "accounts": [1234, 6789],
+        "firstName": "Julie",
+        "lastName": "Lewis",
+        "role": "MANAGER",
+        "access": {
+          "analyticsAccess": true,
+          "inboxAccess": true,
+          "libraryAccess": true
+        }
+      }'
     ```
   </Step>
 </Steps>
 
 <Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+  If you need assistance, contact our support team at [support@socialpilot.co](mailto:support@socialpilot.co).
 </Tip>
+

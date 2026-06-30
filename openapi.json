@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://uat-api.socialpilot.co/uat",
+      "url": "https://uat-api.socialpilot.co",
       "description": "UAT server"
     },
     {
